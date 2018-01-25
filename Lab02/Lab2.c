@@ -35,12 +35,12 @@ int main(void)
     while (1) {
         double num1, num2;
         char operation;
-        printf("\nEnter a mathematical operation to perform (*,/,+,-,v,a,c,f,t,r):"); 
-        
-        scanf("%s", &operation);  
-        if((operation=='/'||operation=='*'||operation=='+'||operation=='-'||operation=='v'||operation=='a'||operation=='c'||operation=='f'||operation=='t'||operation=='r')){
-        printf("Enter value 1:");}
-        else{
+        printf("\nEnter a mathematical operation to perform (*,/,+,-,v,a,c,f,t,r):");
+
+        scanf("%s", &operation);
+        if ((operation == '/' || operation == '*' || operation == '+' || operation == '-' || operation == 'v' || operation == 'a' || operation == 'c' || operation == 'f' || operation == 't' || operation == 'r')) {
+            printf("Enter value 1:");
+        } else {
             printf("Invalid operator");
         }
         scanf("%lf", &num1);
