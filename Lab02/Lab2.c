@@ -31,38 +31,43 @@ int main(void)
 
 
 
-    printf("\nWelcome to Mawi's calculator program");
+    printf("\nWelcome to Dagmawi's calculator program");
     while (1) {
         double num1, num2;
         char operation;
-        printf("\nEnter a mathematical operation to perform (*,/,+,-,v,a,c,f,t,r):");
-        scanf("%s", &operation);
-        printf("Enter value 1:"); 
-        scanf("%f", &num1);
+        printf("\nEnter a mathematical operation to perform (*,/,+,-,v,a,c,f,t,r):"); 
+        
+        scanf("%s", &operation);  
+        if((operation=='/'||operation=='*'||operation=='+'||operation=='-'||operation=='v'||operation=='a'||operation=='c'||operation=='f'||operation=='t'||operation=='r')){
+        printf("Enter value 1:");}
+        else{
+            printf("Invalid operator");
+        }
+        scanf("%lf", &num1);
 
-         if (operation == '+') {
+        if (operation == '+') {
             printf("Enter value 2:");
-            scanf("%f", &num2);
+            scanf("%lf", &num2);
 
         } else if (operation == '-') {
             printf("Enter value 2:");
-            scanf("%f", &num2);
-        
-            
+            scanf("%lf", &num2);
+
+
         } else if (operation == '/') {
             printf("Enter value 2:");
-            scanf("%f", &num2);
-       
+            scanf("%lf", &num2);
+
         } else if (operation == '*') {
             printf("Enter value 2:");
-            scanf("%f", &num2);
-       
+            scanf("%lf", &num2);
+
         } else if (operation == 'v') {
             printf("Enter value 2:");
-            scanf("%f", &num2);
-       
-        }  
-       
+            scanf("%lf", &num2);
+
+        }
+
         if (operation == '+') {
             double resultaddition;
             resultaddition = num1 + num2;
@@ -89,11 +94,11 @@ int main(void)
         } else if (operation == 'f') {
             double fahrenheit = CelsiusToFahrenheit(num1);
             printf("Result of %f deg celsius -> fahrenheit : %f deg\n", num1, fahrenheit);
-     
+
         } else if (operation == 'c') {
             double celsius = FahrenheitToCelsius(num1);
             printf("Result of %f deg fahrenheit -> celsius : %f deg\n", num1, celsius);
-      
+
         } else if (operation == 'v') {
             double Average = (num1 + num2) / 2;
             printf("Result of the average((%f+%f)/2):%f\n", num1, num2, Average);
@@ -101,25 +106,25 @@ int main(void)
         } else if (operation == 't') {
             double tangent = tan((num1 * M_PI) / 180);
             printf("Result of tan(%f): %f\n", num1, tangent);
-      
+
         } else if (operation == 'r') {
             int round = Round(num1);
             printf("Result of  rounded number %f:(%d)\n", num1, round);
-      
-        }
-        
-         }
-        
-    
-     
 
         }
 
+    }
 
-    
-    
-    
-    
+
+
+
+}
+
+
+
+
+//functions
+
 double AbsoluteValue(double x)
 {
     if (x < 0) {
@@ -128,7 +133,6 @@ double AbsoluteValue(double x)
     return x;
 }
 
-
 double FahrenheitToCelsius(double z)
 {
     z = (z - 32)*5 / 9;
@@ -136,14 +140,12 @@ double FahrenheitToCelsius(double z)
 
 }
 
-
 double CelsiusToFahrenheit(double y)
 {
     y = y * 1.8 + 32;
     return y;
 
 }
-
 
 double Average(double p, double z)
 
@@ -154,7 +156,6 @@ double Average(double p, double z)
 
 }
 
-
 double Tangent(double m)
 {
     m = tan((m * M_PI) / 180);
@@ -162,7 +163,6 @@ double Tangent(double m)
 
 
 }
-
 
 double Round(double operand)
 {
@@ -172,14 +172,13 @@ double Round(double operand)
         int b = (int) operand;
         return b;
 
-    } else if (operand < 0) {
+    } else {
         operand = operand - 0.5;
         int b = (int) operand;
         return b;
 
     }
-    
-    return 0;
+
 
 
 }
