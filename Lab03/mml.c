@@ -29,7 +29,7 @@ int main()
     BOARD_Init();
 
     int n = 0;
-    int count = 0;
+   float count = 0;
     {
         float result [3][3];
 
@@ -461,8 +461,8 @@ int main()
     }
     //PRINT
     printf("\n------------------------------\n");
-    printf("%d out of 9 functions passed", count);
-    printf(" (%d%%)", ((count / 9)*100));
+    printf("%.4f out of 9 functions passed",(double) count);
+    printf(" (%.4f%%)", (double)((count / 9)*100));
     float printresult[3][3] = {
         {-5.3, 8, -9.8},
         {-6.8, 7, 8},
