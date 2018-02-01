@@ -1,0 +1,7 @@
+DAGMAWI DEMESS; ID: 1533301
+
+       In this lab, I thought being able to create the functions and implement that function on a different function helped me greatly learn the importance of function in coding assignemnts.The fact I was able to create a matrice calcutor library really helped me understand the vitality of functions.
+
+	My general approach to this lab was to implement every fucntion and print out the result. That was I am able to see the errors that are accoring to my fucnction by looking at the output.I usually first read the assigned reading then after than read the manual and begin the lab. As I worked throught i really struggled to keep everything together, but i was able to eventually organize my functions and unit testing.I really don't like the idea of working with others as that can easily lead to plagirism, so instead i attend all the lab sections every week and get help from the TAs.The TAs are extermely helpful and they helped me understand what we really suppose to do for the lab.
+
+	Eventually I was able to implement all my functions accurately and this lab took me nearly 15 hours as I had to debug a large amount of the time I spent on this lab. I really like how we were utilizing our functions but i didn't enjoy the fact we had to do two unit tests as i felt that just added the amount of time this lab took.The points distribution for the grading seems appropriate and examples from our classes greatly helped me on this lab. Especially the unit testing example.
