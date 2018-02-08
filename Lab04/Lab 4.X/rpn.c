@@ -57,10 +57,10 @@ int their_main(void)
     //    printf("Hello welcome to Dagmawi's RPN calcutor.\n");
     //"we can use atof to check if its negative or subtract coz atof RETURNS  the value  to 0 if its not a value"
 
-    printf("welcome to dagmawi's RPN calcutor");
+    printf("welcome to Dagmawi's RPN calcutor");
     while (TRUE) {
 
-        char userinput[61];
+        char userinput[257];
         struct Stack stackcalc;
         char *tok;
         StackInit(&stackcalc);
@@ -68,12 +68,12 @@ int their_main(void)
         printf("\nEnter floats and + - / * in RPN format:\n");
 
         fgets(userinput, sizeof (userinput), stdin);
-        ProcessBackspace(&stackcalc);
+        ProcessBackspace(userinput);
 
         tok = strtok(userinput, " ");
         while (tok != NULL) {
             float x = atof(tok);
-            if (x != 0) {
+            if (x != 0 || *tok == '0') {
 
                 StackPush(&stackcalc, x);
 
@@ -83,60 +83,76 @@ int their_main(void)
                     StackPop(&stackcalc, &num1);
                     if (StackIsEmpty(&stackcalc)) {
 
-                        printf("empty");
+                        printf("ERROR:Not enough operands before operator.");
                         break;
                     }
                     StackPop(&stackcalc, &num2);
-
                     result = num2 + num1;
                     StackPush(&stackcalc, result);
-                    printf("%f", result);
+
                 } else if (*tok == '*') {
                     StackPop(&stackcalc, &num1);
                     if (StackIsEmpty(&stackcalc)) {
-                        printf("ERROR:Not enough operands before operator.");
+                        printf("ERROR:Not enough operands before operator.\n");
                         break;
                     }
                     StackPop(&stackcalc, &num2);
                     result = num2*num1;
                     StackPush(&stackcalc, result);
-                    printf("%f", result);
+
                 } else if (*tok == '-') {
                     StackPop(&stackcalc, &num1);
                     if (StackIsEmpty(&stackcalc)) {
-                        printf("ERROR:Not enough operands before operator.");
+                        printf("ERROR:Not enough operands before operator.\n");
                         break;
                     }
                     StackPop(&stackcalc, &num2);
                     result = num2 - num1;
                     StackPush(&stackcalc, result);
-                    printf("%f", result);
+
 
                 } else if (*tok == '/') {
                     StackPop(&stackcalc, &num1);
                     if (StackIsEmpty(&stackcalc)) {
-                        printf("ERROR:Not enough operands before operator.");
+                        
+                        printf("ERROR:Not enough operands before operator.\n");
                         break;
                     }
                     StackPop(&stackcalc, &num2);
                     result = num2 / num1;
                     StackPush(&stackcalc, result);
-                    printf("%f", result);
+
+                } else {
+                    printf("Invalid character in RPN string.\n");
+                    break;
                 }
+              
 
             }
-
 
 
             tok = strtok(NULL, " ");
 
         }
-        if (StackIsFull(&stackcalc)) {
-            printf("ERROR:No more room on stack");
+        
+        if (StackGetSize(&stackcalc)==1){
+            StackPop(&stackcalc, &result);
+            
+            printf("Result: %f", result);
+           
+        }
+       
+        
+        else if (StackIsFull(&stackcalc)==1) {
+            printf("ERROR:No more room on stack\n");
+            
         }
 
-        //        else {
-        //        printf("%f", result);}
+        else if (StackGetSize(&stackcalc) != 1) {
+    printf("ERROR: Invalid RPN calculation:more or less than one item in the stack.\n");
+    
+}
+
     }
 
 
