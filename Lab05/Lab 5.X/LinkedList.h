@@ -119,5 +119,6 @@ int LinkedListSort(ListItem *list);
  * @return SUCCESS or STANDARD_ERROR if passed NULL pointers.
  */
 int LinkedListPrint(ListItem *list);
+int CompareStrings(char *str1, char *str2);
 
 #endif

@@ -40,12 +40,13 @@ int main()
 {
     BOARD_Init();
     
-     ListItem *d = LinkedListNew(pig1);
-     ListItem *p = LinkedListCreateAfter(d, cat);
-     ListItem *r = LinkedListCreateAfter(p, crab);
-     LinkedListSort(d);
-     LinkedListPrint(d);
- 
+//     ListItem *d = LinkedListNew(crab);
+//     ListItem *p = LinkedListCreateAfter(d, NULL);
+//     ListItem *r = LinkedListCreateAfter(d, pig1);
+//     LinkedListPrint(d);
+//     LinkedListSort(d);
+//     LinkedListPrint(d);
+// 
      
      
      
@@ -57,36 +58,79 @@ int main()
      * and displays the number of occurrences of each word in the list as
      * described by UnsortedWordCount() below.
      */
-    //    // Initialize an unsorted word list.
-    //    ListItem *unsortedWordList = NULL;
-    //    if (!InitializeUnsortedWordList(&unsortedWordList) || !unsortedWordList) {
-    //        printf("ERROR: Failed to initialize word list\n");
-    //        while (true);
-    //    }
-    //
-    //    // Print the list
-    //    LinkedListPrint(unsortedWordList);
-    //
-    //    // Get the word counts for every string in the list
-    //    int g = LinkedListSize(unsortedWordList);
-    //    int wordCount[g];
-    //
-    //    // Print the word count results
-    //    unsortedWordList = LinkedListGetFirst(unsortedWordList);
-    //    if (UnsortedWordCount(unsortedWordList, wordCount)) {
-    //        printf("[%d, %d, %d, %d, %d, %d, %d, %d, %d, %d]\n",
-    //               wordCount[0], wordCount[1], wordCount[2],
-    //               wordCount[3], wordCount[4], wordCount[5],
-    //               wordCount[6], wordCount[7], wordCount[8],
-    //               wordCount[9]);
-    //    } else {
-    //        printf("ERROR\n");
-    //    }
-    //    printf("\n");
-
+        // Initialize an unsorted word list.
+        ListItem *unsortedWordList = NULL;
+        if (!InitializeUnsortedWordList(&unsortedWordList) || !unsortedWordList) {
+            printf("ERROR: Failed to initialize word list\n");
+            while (1);
+        }
+    
+        // Print the list
+        LinkedListPrint(unsortedWordList);
+    
+        // Get the word counts for every string in the list
+        int g = LinkedListSize(unsortedWordList);
+        int wordCount[g];
+    
+        // Print the word count results
+        unsortedWordList = LinkedListGetFirst(unsortedWordList);
+        if (UnsortedWordCount(unsortedWordList, wordCount)) {
+            printf("[%d, %d, %d, %d, %d, %d, %d, %d, %d, %d]\n",
+                   wordCount[0], wordCount[1], wordCount[2],
+                   wordCount[3], wordCount[4], wordCount[5],
+                   wordCount[6], wordCount[7], wordCount[8],
+                   wordCount[9]);
+        } else {
+            printf("ERROR\n");
+        }
+        printf("\n");
+        ListItem *freememory;
+        while(unsortedWordList){
+            freememory=unsortedWordList;
+                    unsortedWordList=unsortedWordList->nextItem;
+                    LinkedListRemove(freememory);
+        }
+        
+//        for(LinkedListGetFirst(unsortedWordList);unsortedWordList;freememory=unsortedWordList){
+//            freememory=freememory->nextItem
+//                    LinkedListRemove(unsortedWordList);
+//        }
     /******************************** Your custom code goes below here ********************************/
-    printf("Welcome to CMPE13 Lab5 Blank. Please remove before starting.\r\n");
+    ListItem *sortedlist=NULL;
+ 
 
+        if (!InitializeUnsortedWordList(&sortedlist ) || !sortedlist ) {
+            printf("ERROR: Failed to initialize word list\n");
+            while (1);
+        }
+    
+        // Print the list
+    
+       LinkedListSort(sortedlist);
+       
+ LinkedListPrint(sortedlist);
+   
+        // Get the word counts for every string in the list
+        int h = LinkedListSize(sortedlist );
+        int WordCount1[h];
+    
+        // Print the word count results
+        sortedlist  = LinkedListGetFirst(sortedlist );
+        if (SortedWordCount(sortedlist , WordCount1)==SUCCESS) {
+            printf("[%d, %d, %d, %d, %d, %d, %d, %d, %d, %d]\n",
+                   WordCount1[0], WordCount1[1], WordCount1[2],
+                   WordCount1[3], WordCount1[4], WordCount1[5],
+                   WordCount1[6], WordCount1[7], WordCount1[8],
+                   WordCount1[9]);
+        } else {
+            printf("ERROR\n");
+        }
+        printf("\n");
+         while(unsortedWordList){
+            freememory=sortedlist;
+                    sortedlist=sortedlist->nextItem;
+                    LinkedListRemove(freememory);
+        }
 
     /******************************** Your custom code goes above here ********************************/
 
@@ -95,7 +139,7 @@ int main()
     while (1);
 }
 
-#ifndef LINKED_LIST_TESTING
+#ifdef LINKED_LIST_TESTING
 /**
  * This functions takes in the head of an unsorted list of words, and an array to store the number
  * of occurrences of each word.  The first time a word appears, the number of occurrences of that
@@ -247,19 +291,38 @@ int InitializeUnsortedWordList(ListItem **unsortedWordList)
  */
 
 #endif
-
-
-//int SortedWordCount(ListItem *list, int *wordCount):
-//if list is not the head:
-//error out
-//for every item in list:
-//if item is NULL:
-//set word count to 0 for this item and continue
-//else:
-//for every newItem after this one:
-//if newItem is the same as item:
-//increment a counter
-//save the word count for this item
-//for every newItem after this one:
-//if newItem is the same as item:
-//save the negative of the word count for this newItem
+int SortedWordCount(ListItem* list, int *wordCount)
+{
+    
+  if (list->previousItem != NULL) {
+    return STANDARD_ERROR;
+  }
+  
+  int index = 0;
+  while(list != NULL) {
+      
+    ListItem *firstItem = list;
+    int count = 0;
+    if (firstItem->data==NULL){
+      wordCount[index] = count;
+    index = index + 1;
+    list = list->nextItem;
+    continue;
+    }
+    while(list != NULL && CompareStrings(firstItem->data, list->data) == 0) {
+     
+      count++;
+      list = list->nextItem;
+    }
+    
+    wordCount[index] = count;
+    index = index + 1;
+    int i = 1;
+    for(; i < count; i++) {
+      wordCount[index] = -count;
+      index = index + 1;
+    }
+  }
+  
+  return SUCCESS;
+}

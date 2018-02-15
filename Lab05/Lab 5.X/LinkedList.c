@@ -38,9 +38,9 @@ char *LinkedListRemove(ListItem *item)
     if (item == NULL) {
         return NULL;
     }
-    if (item->previousItem == NULL) {
+    if ((item->previousItem == NULL)&&(item->nextItem != NULL)) {
         item->nextItem->previousItem = NULL;
-    } else if (item->nextItem == NULL) {
+    } else if ((item->nextItem == NULL)&&(item->previousItem!=NULL)) {
         item->previousItem->nextItem = NULL;
     } else if (item->previousItem != NULL && item->nextItem != NULL) {
         item->previousItem->nextItem = item->nextItem;
@@ -115,12 +115,12 @@ ListItem *LinkedListCreateAfter(ListItem *item, char *data)
     
     if(item->nextItem == NULL) {
         item->nextItem = newItem;
-        newItem->previousItem = item;
+        newItem->previousItem = item;//assigning nextitem of item to newItem/vice versa
     } else {
         newItem->nextItem= item->nextItem;
         item->nextItem = newItem;
         newItem->nextItem->previousItem = newItem;
-        newItem->previousItem = item;
+        newItem->previousItem = item;//new item data will be pointed by item nextitem
     }
     return newItem;
 }
@@ -172,8 +172,8 @@ int LinkedListSort(ListItem *list) {
     while(ref->nextItem != NULL) {
        ListItem *secondItem = ref->nextItem;
        while(secondItem != NULL) {
-           if(strcmp(ref->data, secondItem->data) > 0) {
-               LinkedListSwapData(ref, secondItem);
+           if(CompareStrings(ref->data, secondItem->data) > 0) {//using comparestring for handling of null
+               LinkedListSwapData(ref, secondItem);//compare if string are equal if its > 0 swap. 
            }
            secondItem = secondItem->nextItem;
        }
@@ -208,4 +208,21 @@ int LinkedListPrint(ListItem *list) {
    }
    printf("]");
    return SUCCESS;
+}
+int CompareStrings(char *str1, char *str2) {// need this function for handling null-impossible for me to implement this on sort
+  if(str1 == NULL && str2 == NULL) {
+    return 0;
+  }
+  
+  if(str1 == NULL && str2 != NULL) {
+    return -1;
+  }
+  if(str1 != NULL && str2 == NULL) {
+    return 1;
+  }
+  
+  if(strlen(str1) == strlen(str2)) {
+    return strcmp(str1, str2);
+  }
+  return ((int)strlen(str1) - (int)strlen(str2));
 }

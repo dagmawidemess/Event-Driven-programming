@@ -1,0 +1,7 @@
+Dagmawi Demess
+
+	This lab where we had to use  doubly-linked list data structure to sort the strings. Double linked list really helped me in this lab to access whatever in a much faster mode as i was able to go back and forth if necessary unlike single linked list or arrays. 
+
+	I generally approach the labs by reading my notes and the reading assigned. I really thought it was difficult for me to be able to implement the functions until i went to the first lab where i had a much better understanding of what we really had to do. Although the lab manual helped me, I really struggled to understand the pointers. Eventually with 1000 tries and with the AWESOME TA’s i was able to implement the libraries. I really struggled on handling the null as everytime my sort word function crashed due to the null. I was able to handle that eventually by creating compare string function. 
+
+	My lab worked eventually perfect  but it did take me a significant amount of hours. I spent nearly 25 hours in this lab. And as a first time coder i really struggled  and took significant amount of time to have a  conceptual understanding of the lab. The hardest part of the lab for me was creating the sort word function as it took me nearly 6 hours to implement just that one function.  The point distribution seems fine to me and the lab manual nearly covered everything i needed although sometimes it was a bit vague. 
