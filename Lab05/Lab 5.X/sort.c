@@ -126,7 +126,7 @@ int main()
             printf("ERROR\n");
         }
         printf("\n");
-         while(unsortedWordList){
+         while(sortedlist){
             freememory=sortedlist;
                     sortedlist=sortedlist->nextItem;
                     LinkedListRemove(freememory);
