@@ -55,6 +55,6 @@ uint8_t ButtonsCheckEvents(void) {
         ret |= buttonState & 0x08 ? BUTTON_EVENT_4DOWN : BUTTON_EVENT_4UP;//LED 0x40 will be set=1
     }
     
-    oldButtonState = buttonState;// sets all the button event down to true , setting LED 0x02 and 0x01==1 ie. when anded with 0x01
+    oldButtonState = buttonState;// save the current button state to use for comparison
     return ret;
 }
