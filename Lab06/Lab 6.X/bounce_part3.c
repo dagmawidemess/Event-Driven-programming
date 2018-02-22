@@ -93,5 +93,5 @@ void __ISR(_TIMER_1_VECTOR, IPL4AUTO) Timer1Handler(void)
 {
     // Clear the interrupt flag.
     INTClearFlag(INT_T1);
-
+   ButtonsCheckEvents();
 }
