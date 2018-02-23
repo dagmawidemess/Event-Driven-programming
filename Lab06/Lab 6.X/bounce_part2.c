@@ -55,7 +55,7 @@ int main(void)
     char result [100];
     while (1) {
         if (ADC.event == TRUE) {
-            float percent = (((float) ADC.value) / 1023)*100; //percent formula 
+            double percent = (((double) ADC.value) / 1023)*100; //percent formula 
             sprintf(result, "Potentiometer Value :\n %4d\n %3.0f %%", ADC.value, percent);
             OledDrawString(result); //displaying on the OLED
             OledUpdate();
