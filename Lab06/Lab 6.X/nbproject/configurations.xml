@@ -74,7 +74,7 @@
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
-      <item path="Buttons.c" ex="true" overriding="false">
+      <item path="Buttons.c" ex="false" overriding="false">
         <C32>
         </C32>
         <C32-AR>
@@ -300,7 +300,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="bounce_part1.c" ex="false" overriding="false">
+      <item path="bounce_part1.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AR>
@@ -328,7 +328,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="bounce_part3.c" ex="true" overriding="false">
+      <item path="bounce_part3.c" ex="false" overriding="false">
         <C32>
         </C32>
         <C32-AR>

@@ -16,12 +16,13 @@
 // **** Set macros and preprocessor directives ****
 
 // **** Declare any datatypes here ****
-typedef struct{
-   uint8_t event;
-   uint16_t value;
-}AdcResult;
+
+typedef struct {
+    uint8_t event;
+    uint16_t value;
+} AdcResult;
 // **** Define global, module-level, or external variables here ****
- AdcResult ADC; 
+AdcResult ADC;
 // **** Declare function prototypes ****
 
 int main(void)
@@ -47,26 +48,21 @@ int main(void)
             );
     EnableADC10();
 
-    /***************************************************************************************************
-     * Your code goes in between this comment and the following one with asterisks.
-     **************************************************************************************************/
-    ADC.event=TRUE;
-    ADC.value=0;
+    //MAIN
+    ADC.event = TRUE;
+    ADC.value = 0;
     OledInit();
     char result [100];
-    while(1){
-        if(ADC.event==TRUE){
-            float percent=(((float)ADC.value)/1023)*100;//percent formula 
-            sprintf(result,"Potentiometer Value :\n %4d\n %3.0f %%",ADC.value,percent);
-            OledDrawString(result);//displaying on the OLED
+    while (1) {
+        if (ADC.event == TRUE) {
+            float percent = (((float) ADC.value) / 1023)*100; //percent formula 
+            sprintf(result, "Potentiometer Value :\n %4d\n %3.0f %%", ADC.value, percent);
+            OledDrawString(result); //displaying on the OLED
             OledUpdate();
-           ADC.event=FALSE;
-        } 
+            ADC.event = FALSE;
+        }
     }
 
-    /***************************************************************************************************
-     * Your code goes in between this comment and the preceding one with asterisks
-     **************************************************************************************************/
 
     while (1);
 }
@@ -82,10 +78,10 @@ void __ISR(_ADC_VECTOR, IPL2AUTO) AdcHandler(void)
 {
     // Clear the interrupt flag.
     INTClearFlag(INT_AD1);
-    float average= (float) ((ADC1BUF0+ADC1BUF1 +ADC1BUF2 +ADC1BUF3 +ADC1BUF4 +ADC1BUF5 + ADC1BUF6 +ADC1BUF7 )/8);
-    if(average !=ADC.value){
-           ADC.value=average;
-        ADC.event=TRUE;
+    float average = (float) ((ADC1BUF0 + ADC1BUF1 + ADC1BUF2 + ADC1BUF3 + ADC1BUF4 + ADC1BUF5 + ADC1BUF6 + ADC1BUF7) / 8);
+    if (average != ADC.value) {
+        ADC.value = average;
+        ADC.event = TRUE;
     }
- 
+
 }

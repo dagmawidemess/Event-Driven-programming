@@ -9,9 +9,10 @@ uint8_t oldButtonState = 0;
  * the necessary bits in TRISD/TRISF. Only the bits necessary to enable the 1-4 buttons are
  * modified so that this library does not interfere with other libraries.
  */
-void ButtonsInit(void){
+void ButtonsInit(void)
+{
     TRISD |= 0x00E0;
-    TRISF |= 0x0002;  
+    TRISF |= 0x0002;
 }
 
 /**
@@ -34,27 +35,28 @@ void ButtonsInit(void){
  * @return A bitwise-ORing of the constants in the ButtonEventFlags enum or BUTTON_EVENT_NONE if no
  *         event has occurred.
  */
-uint8_t ButtonsCheckEvents(void) {
+uint8_t ButtonsCheckEvents(void)
+{
     uint8_t buttonState = BUTTON_STATES();
-    
+
     uint8_t ret = BUTTON_EVENT_NONE;
-    
-    if((buttonState & 0x01) != (oldButtonState & 0x01)) {
-        ret |= buttonState & 0x01 ? BUTTON_EVENT_1DOWN : BUTTON_EVENT_1UP;//LED 0x01 will be set=1
+
+    if ((buttonState & 0x01) != (oldButtonState & 0x01)) {
+        ret |= buttonState & 0x01 ? BUTTON_EVENT_1DOWN : BUTTON_EVENT_1UP; //LED 0x01 will be set=1
     }
-    
-    if((buttonState & 0x02) != (oldButtonState & 0x02)) {
-        ret |= buttonState & 0x02 ? BUTTON_EVENT_2DOWN : BUTTON_EVENT_2UP;//LED 0x04 will be set=1
+
+    if ((buttonState & 0x02) != (oldButtonState & 0x02)) {
+        ret |= buttonState & 0x02 ? BUTTON_EVENT_2DOWN : BUTTON_EVENT_2UP; //LED 0x04 will be set=1
     }
-    
-    if((buttonState & 0x04) !=(oldButtonState & 0x04)) {
-        ret |= buttonState & 0x04 ? BUTTON_EVENT_3DOWN : BUTTON_EVENT_3UP;//LED 0x10 will be set=1
+
+    if ((buttonState & 0x04) != (oldButtonState & 0x04)) {
+        ret |= buttonState & 0x04 ? BUTTON_EVENT_3DOWN : BUTTON_EVENT_3UP; //LED 0x10 will be set=1
     }
-    
-    if((buttonState & 0x08) != (oldButtonState & 0x08)) {
-        ret |= buttonState & 0x08 ? BUTTON_EVENT_4DOWN : BUTTON_EVENT_4UP;//LED 0x40 will be set=1
+
+    if ((buttonState & 0x08) != (oldButtonState & 0x08)) {
+        ret |= buttonState & 0x08 ? BUTTON_EVENT_4DOWN : BUTTON_EVENT_4UP; //LED 0x40 will be set=1
     }
-    
-    oldButtonState = buttonState;// save the current button state to use for comparison
+
+    oldButtonState = buttonState; // save the current button state to use for comparison
     return ret;
 }

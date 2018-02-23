@@ -20,17 +20,15 @@ typedef struct {
     uint8_t value;
 } TimerResult;
 
-//typedef struct {
-//
-//};
 // **** Define global, module-level, or external variables here ****
 TimerResult timer;
 // **** Declare function prototypes ****
 
-int getLED(int LEDNumber) {
+int getLED(int LEDNumber)
+{
     int ret = 1;
     int i = 0;
-    for(; i < LEDNumber; i++) {
+    for (; i < LEDNumber; i++) {
         ret = ret * 2;
     }
     return ret;
@@ -50,10 +48,7 @@ int main(void)
     INTSetVectorSubPriority(INT_TIMER_1_VECTOR, INT_SUB_PRIORITY_LEVEL_0);
     INTEnable(INT_T1, INT_ENABLED);
 
-    /***************************************************************************************************
-     * Your code goes in between this comment and the following one with asterisks.
-     **************************************************************************************************/
-
+    //MAIN 
     LED_INIT();
     timer.event = 0;
     timer.value = 0;
@@ -63,26 +58,17 @@ int main(void)
     while (1) {
         LED_SET(getLED(LEDNumber));
         if (timer.event == TRUE) {
-            if(LEDNumber == 7) {
-                direction = -1;//LED move to the right from 0x80
-            } 
-            
-            if(LEDNumber == 0) {
-                direction = 1;//LED move to the left from 0x01
+            if (LEDNumber == 7) {
+                direction = -1; //LED move to the right from 0x80
+            }
+
+            if (LEDNumber == 0) {
+                direction = 1; //LED move to the left from 0x01
             }
             LEDNumber = LEDNumber + direction;
         }
         timer.event = FALSE;
     }
-
-
-
-
-
-
-    /***************************************************************************************************
-     * Your code goes in between this comment and the preceding one with asterisks
-     **************************************************************************************************/
 
     while (1);
 }
@@ -100,7 +86,7 @@ void __ISR(_TIMER_1_VECTOR, IPL4AUTO) Timer1Handler(void)
     // Clear the interrupt flag.
     INTClearFlag(INT_T1);
     if (timer.value > SWITCH_STATES()) {
-       timer.event = TRUE;
+        timer.event = TRUE;
         timer.value = 0;
     }
 }
