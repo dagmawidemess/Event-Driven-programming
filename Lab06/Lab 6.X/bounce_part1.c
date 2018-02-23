@@ -75,9 +75,6 @@ int main(void)
         timer.event = FALSE;
     }
 
-    while(1) {
-        
-    }
 
 
 
