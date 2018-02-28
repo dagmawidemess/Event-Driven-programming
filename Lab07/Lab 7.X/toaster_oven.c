@@ -54,10 +54,6 @@ typedef struct {
 } ovenmode;
 // **** Define any module-level, global, or external variables here ****
 ovenmode oven;
-
-
-
-
 // Configuration Bit settings
 
 //static const char ovenBottom[5];
@@ -124,6 +120,7 @@ int main()
             oven.temperature = defaultTemp;
             oven.inputSelection = 0; //0=time, 1=input set for temp
             oven.OS = 0; //oven off
+            OledDisplay();
             OledUpdate();
             oven.OS = START;
 
@@ -135,6 +132,7 @@ int main()
                 oven.initialcooktime = oven.cookingtimeleft; //save intitial start time
                 oven.OS = 1; //turn on oven
                 oven.events = 0; //clear button event
+                OledDisplay();
                 OledUpdate();
                 oven.OS = COUNTDOWN;
             } else if (BUTTON_EVENT_3DOWN & oven.events) {
@@ -147,7 +145,7 @@ int main()
 
                 if (oven.inputSelection == 1) { //inputselection=1->temprature
                     Adc = AdcRead();
-                    oven.temperature = (int) ((Adc >> 2) + 300);
+                    oven.temperature = ((Adc >> 2) + 300);
 
                 } else if (oven.inputSelection == 0) {
                     Adc = AdcRead();
@@ -181,8 +179,7 @@ int main()
                     oven.temperature = 350;
                     oven.inputSelection = 0;
                 }
-
-                else if (oven.freerunningitem - oven.buttonpresscounter > LongPress) {
+                else if (oven.freerunningitem - oven.buttonpresscounter >= LongPress) {
 
                     if (oven.inputSelection == 1) {
                         oven.inputSelection = 0;
@@ -209,23 +206,17 @@ int main()
 
                 if (oven.cookingtimeleft == ((oven.initialcooktime * 7) / 8)) {
                     LED_SET(0xFE); //the first LED is OFF, 11111110
-                }
-                else if (oven.cookingtimeleft == ((oven.initialcooktime * 6) / 8)) {
+                } else if (oven.cookingtimeleft == ((oven.initialcooktime * 6) / 8)) {
                     LED_SET(0xFC); //the second LED is OFF, 11111100
-                }
-                else if (oven.cookingtimeleft == ((oven.initialcooktime * 5) / 8)) {
+                } else if (oven.cookingtimeleft == ((oven.initialcooktime * 5) / 8)) {
                     LED_SET(0xF8); //the third LED is OFF, 11111000
-                }
-                else if (oven.cookingtimeleft == ((oven.initialcooktime * 4) / 8)) {
+                } else if (oven.cookingtimeleft == ((oven.initialcooktime * 4) / 8)) {
                     LED_SET(0xF0); //the fourth LED is OFF, 11110000
-                }
-                else if (oven.cookingtimeleft == ((oven.initialcooktime * 3) / 8)) {
+                } else if (oven.cookingtimeleft == ((oven.initialcooktime * 3) / 8)) {
                     LED_SET(0xE0); //the fifth LED is OFF, 11100000
-                }
-                else if (oven.cookingtimeleft == ((oven.initialcooktime * 2) / 8)) {
+                } else if (oven.cookingtimeleft == ((oven.initialcooktime * 2) / 8)) {
                     LED_SET(0xC0); //the sixth LED is OFF, 11000000
-                }
-                else if (oven.cookingtimeleft == ((oven.initialcooktime * 1) / 8)) {
+                } else if (oven.cookingtimeleft == ((oven.initialcooktime * 1) / 8)) {
                     LED_SET(0x80); //the seventh LED is OFF, 10000000
                 }
 
@@ -242,7 +233,6 @@ int main()
                 OledDisplay();
                 OledUpdate();
             }
-
             else if (oven.cooktimerflag == 1 && oven.cookingtimeleft == 0) {
                 OledDisplay();
                 OledUpdate();
@@ -252,25 +242,30 @@ int main()
 
             break;
         case (PENDING_RESET):
-            
             if (BUTTON_EVENT_4UP & oven.events) {
-                if (((oven.freerunningitem) - oven.buttonpresscounter) > LongPress){
+                if (oven.freerunningitem - oven.buttonpresscounter >= LongPress) {
+                    oven.events = 0;
+                    oven.cookingtimeleft = 0;
+                    oven.cooktimerflag = 0;
+                } else if (((oven.freerunningitem) - oven.buttonpresscounter) < LongPress) {
+
+                    oven.events = 0;
+                }
+
                 OledDisplay();
                 OledUpdate();
-                oven.events = 0;
                 oven.OS = COUNTDOWN;
-            
-            }} else if (oven.cookingtimeleft > 0 && oven.cooktimerflag == 1) {
+            } else if (oven.cookingtimeleft > 0 && oven.cooktimerflag == 1) {
                 oven.cooktimerflag -= 1;
                 OledDisplay();
                 OledUpdate();
                 oven.cooktimerflag = 0;
-                oven.initialcooktime = 0;
                 oven.OS = PENDING_RESET;
             } else if ((oven.cooktimerflag = 1) && (oven.cookingtimeleft == 0)) {
+                oven.cooktimerflag = 0;
                 OledDisplay();
                 OledUpdate();
-                oven.cooktimerflag = 0;
+
                 oven.OS = RESET;
             }
             break;
@@ -335,17 +330,17 @@ void OledDisplay()
     if (oven.cookmode == Bake) {
         sprintf(tempstring, "Bake");
     }
-    sprintf(strings, "|%s| \t\t Mode: %s\n|\t\t\t\t|\t\t\t%sTime %d: %d\n|----|\t\t %sTemp:%d \xF8\x46\n|%s|",ovenTop, tempstring, pointer,
-            (oven.cookingtimeleft / 60), (oven.cookingtimeleft % 60), pointertemp, oven.temperature,ovenBottom);
+    sprintf(strings, "|%s| \t\t Mode: %s\n|\t\t\t\t|\t\t\t%sTime %d: %02d\n|----|\t\t %sTemp:%d \xF8\x46\n|%s|", ovenTop, tempstring, pointer,
+            (oven.cookingtimeleft / 60), (oven.cookingtimeleft % 60), pointertemp, oven.temperature, ovenBottom);
     if (oven.cookmode == Toast) {
         sprintf(tempstring, "Toast");
-        sprintf(strings, "|%s| \t\t Mode: %s\n|\t\t\t\t|\t\t\t%sTime %d: %d\n|----|\t\t       \n|%s|",ovenTop, tempstring, pointer,
-                (oven.cookingtimeleft / 60), (oven.cookingtimeleft % 60),ovenBottom);
+        sprintf(strings, "|%s| \t\t Mode: %s\n|\t\t\t\t|\t\t\t Time %d: %02d\n|----|\t\t       \n|%s|", ovenTopOff, tempstring,
+                (oven.cookingtimeleft / 60), (oven.cookingtimeleft % 60), ovenBottom);
     } else if (oven.cookmode == Broil) {
         oven.temperature = 500;
         sprintf(tempstring, "Broil");
-        sprintf(strings, "|%s| \t\t Mode: %s\n|\t\t\t\t|\t\t\t%sTime %d: %d\n|----|\t\t %sTemp:%d \xF8\x46\n|%s|",ovenTop, tempstring, pointer,
-                (oven.cookingtimeleft / 60), (oven.cookingtimeleft % 60), pointertemp, oven.temperature,ovenBottom);
+        sprintf(strings, "|%s| \t\t Mode: %s\n|\t\t\t\t|\t\t\t Time %d: %02d\n|----|\t\t  Temp:%d \xF8\x46\n|%s|", ovenTop, tempstring,
+                (oven.cookingtimeleft / 60), (oven.cookingtimeleft % 60), oven.temperature, ovenBottomOff);
     }
 
 
