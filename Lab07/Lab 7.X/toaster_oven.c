@@ -54,16 +54,12 @@ typedef struct {
 } ovenmode;
 // **** Define any module-level, global, or external variables here ****
 ovenmode oven;
-const char topOvenOn = 0x01;
-const char topOvenOff = 0x02;
-const char BottomOvenOn = 0x03;
-const char BottomOvenOff = 0x04;
+
 
 
 
 // Configuration Bit settings
 
-static const char word[100];
 //static const char ovenBottom[5];
 
 
@@ -155,7 +151,7 @@ int main()
 
                 } else if (oven.inputSelection == 0) {
                     Adc = AdcRead();
-                    oven.initialcooktime = ((Adc >> 2));
+                    oven.initialcooktime = (Adc >> 2);
 
                 }
 
@@ -256,12 +252,15 @@ int main()
 
             break;
         case (PENDING_RESET):
+            
             if (BUTTON_EVENT_4UP & oven.events) {
+                if (((oven.freerunningitem) - oven.buttonpresscounter) > LongPress){
                 OledDisplay();
                 OledUpdate();
                 oven.events = 0;
                 oven.OS = COUNTDOWN;
-            } else if (oven.cookingtimeleft > 0 && oven.cooktimerflag == 1) {
+            
+            }} else if (oven.cookingtimeleft > 0 && oven.cooktimerflag == 1) {
                 oven.cooktimerflag -= 1;
                 OledDisplay();
                 OledUpdate();
