@@ -19,9 +19,9 @@
 #define TIMER_2HZ_RESET() (TMR1 = 0)
 #define defaultTemp 350
 #define LongPress 5
-
-
-
+#define CLEAR 0
+#define SET 1
+#define timeSlower 2
 
 // **** Declare any datatypes here ****
 void OledDisplay();
@@ -43,18 +43,24 @@ typedef enum {
 typedef struct {
     uint16_t cookingtimeleft;
     uint16_t initialcooktime;
-    int temperature;
-    uint8_t buttonpresscounter; //stores free running time
+    uint16_t temperature;
+    uint16_t buttonpresscounter; //stores free running time
     uint16_t freerunningitem;
-    int inputSelection; //0=time;1=temp
-    int cooktimerflag; //2HZ timer
+    uint16_t inputSelection; //0=time;1=temp
+    uint16_t cooktimerflag; //2HZ timer
     cookstate cookmode;
     ovenstate OS;
-    uint8_t events;
+    uint16_t events;
 } ovenmode;
 // **** Define any module-level, global, or external variables here ****
 ovenmode oven;
-//Main
+// Configuration Bit settings
+
+//static const char ovenBottom[5];
+
+
+// #define "\x01\x01" %s; we can do \x01 to display the first LED
+//create a function update OLED()- so we can store status of the OLED-need struct to keep the value;-struct countdown from the ovemode
 
 int main()
 {
@@ -98,48 +104,46 @@ int main()
     ButtonsInit();
     AdcInit();
     oven.OS = RESET;
-    oven.initialcooktime = 0;
+    oven.initialcooktime = CLEAR;
     OledDisplay();
     OledUpdate();
-    uint16_t Adc = 0;
-
+    uint16_t Adc = CLEAR;
+   
     while (1) {
         switch (oven.OS) {
         case (RESET):
-
             LED_SET(0x00);
             oven.temperature = defaultTemp;
-            oven.inputSelection = 0; //0=time, 1=input set for temp
-            oven.OS = 0; //oven off
+            oven.inputSelection = CLEAR; //0=time, 1=input set for temp
+            oven.OS = CLEAR; //oven off
             OledDisplay();
             OledUpdate();
             oven.OS = START;
             break;
-
+       
         case(START):
-
             if (BUTTON_EVENT_4DOWN & oven.events) {
                 LED_SET(0xFF); //turns on all leds on event
-                oven.cooktimerflag = 0; //2Hz timer
+                oven.cooktimerflag = TIMER_2HZ_RESET(); //2Hz timer
                 oven.initialcooktime = oven.cookingtimeleft; //save intitial start time
-                oven.OS = 1; //turn on oven
-                oven.events = 0; //clear button event
+                oven.OS = SET; //turn on oven
+                oven.events = BUTTON_EVENT_NONE; //clear button event
                 OledDisplay();
                 OledUpdate();
                 oven.OS = COUNTDOWN;
             } else if (BUTTON_EVENT_3DOWN & oven.events) {
                 oven.buttonpresscounter = oven.freerunningitem; //store free running counter
-                oven.events = 0;
+                oven.events = BUTTON_EVENT_NONE;
                 oven.OS = PENDING_SELECTOR_CHANGE;
             }
 
             if (AdcChanged()) {
 
-                if (oven.inputSelection == 1) { //inputselection=1->temprature and 0->time
+                if (oven.inputSelection == SET) { //inputselection=1->temprature & inpitslection= 0->time
                     Adc = AdcRead();
                     oven.temperature = ((Adc >> 2) + 300);
 
-                } else if (oven.inputSelection == 0) {
+                } else if (oven.inputSelection == CLEAR) {
                     Adc = AdcRead();
                     oven.initialcooktime = (Adc >> 2) + 1;
                 }
@@ -149,8 +153,8 @@ int main()
             }
             break;
 
-        case (PENDING_SELECTOR_CHANGE)://reset button counter< LONG PRESS&& BUTTON_EVENT_3UP
 
+        case (PENDING_SELECTOR_CHANGE)://reset button counter< LONG PRESS&& BUTTON_EVENT_3UP
             if (BUTTON_EVENT_3UP & oven.events) {
 
                 if (((oven.freerunningitem) - oven.buttonpresscounter) < LongPress) {
@@ -162,27 +166,28 @@ int main()
                     } else if (oven.cookmode == Broil) {
                         oven.cookmode = Bake;
                     }
-                    oven.initialcooktime = 0;
-                    oven.inputSelection = 0;
-                } else if ((oven.freerunningitem) - (oven.buttonpresscounter) >= LongPress) {
-                    if (oven.inputSelection == 1) {
-                        oven.inputSelection = 0;
-                    } else if (oven.inputSelection == 0) {
-                        oven.inputSelection = 1;
+                    oven.initialcooktime = CLEAR;
+                    oven.temperature = 350;
+                    oven.inputSelection = CLEAR;
+                } else if (oven.freerunningitem - oven.buttonpresscounter >= LongPress) {
+                    if (oven.inputSelection == SET) {
+                        oven.inputSelection = CLEAR;//SET=1 for temp and CLEAR=0 for time
+                    } else {
+                        oven.inputSelection = SET;
                     }
                 }
                 OledDisplay();
                 OledUpdate();
-                oven.events = 0;
+                oven.events = BUTTON_EVENT_NONE;
                 oven.OS = START;
             }
+
             break;
 
         case (COUNTDOWN):
-
-            if (oven.cooktimerflag == 1 && oven.cookingtimeleft != 0) {
-                oven.cookingtimeleft -= 1;
-                oven.cooktimerflag = 0;
+            if (oven.cooktimerflag == SET && oven.cookingtimeleft != CLEAR) {
+                oven.cookingtimeleft -= SET;
+                oven.cooktimerflag = TIMER_2HZ_RESET();
 
                 if (oven.cookingtimeleft == ((oven.initialcooktime * 7) / 8)) {
                     LED_SET(0xFE); //the first LED is OFF, 11111110
@@ -203,40 +208,45 @@ int main()
                 OledUpdate();
                 oven.OS = COUNTDOWN;
             }
+
             if (BUTTON_EVENT_4DOWN & oven.events) {
                 oven.buttonpresscounter = oven.freerunningitem;
-                oven.events = 0;
+                oven.events = BUTTON_EVENT_NONE;
+                OledDisplay();
+                OledUpdate();
                 oven.OS = PENDING_RESET;
+            } else if (oven.cooktimerflag == SET && oven.cookingtimeleft == CLEAR) {
                 OledDisplay();
                 OledUpdate();
-            } else if (oven.cooktimerflag == 1 && oven.cookingtimeleft == 0) {
-                OledDisplay();
-                OledUpdate();
-                oven.cooktimerflag = 0;
+                oven.cooktimerflag = TIMER_2HZ_RESET();
                 oven.OS = RESET;
             }
+
             break;
-
         case (PENDING_RESET):
-
             if (BUTTON_EVENT_4UP & oven.events) {
                 if (oven.freerunningitem - oven.buttonpresscounter >= LongPress) {
-                    oven.events = 0;
-                    oven.cookingtimeleft = 0;
-                    oven.cooktimerflag = 0;
-                    OledDisplay();
-                    OledUpdate();
-                    oven.OS = COUNTDOWN;
+                    oven.events = BUTTON_EVENT_NONE;
+                    oven.cookingtimeleft = CLEAR;
+                    oven.cooktimerflag = TIMER_2HZ_RESET();
+                } else if (((oven.freerunningitem) - oven.buttonpresscounter) < LongPress) {
+                    oven.events = BUTTON_EVENT_NONE;
                 }
-            } else if (oven.cookingtimeleft > 0 && oven.cooktimerflag == 1) {
+
                 OledDisplay();
                 OledUpdate();
-                oven.cooktimerflag = 0;
+                oven.OS = COUNTDOWN;
+            } else if (oven.cookingtimeleft > CLEAR && oven.cooktimerflag == SET) {
+                oven.cooktimerflag -= SET;//decrement cooktimerflag
+                OledDisplay();
+                OledUpdate();
+                oven.cooktimerflag = TIMER_2HZ_RESET();
                 oven.OS = PENDING_RESET;
-            } else if ((oven.cooktimerflag = 1) && (oven.cookingtimeleft == 0)) {
-                oven.cooktimerflag = 0;
+            } else if ((oven.cooktimerflag = SET) && (oven.cookingtimeleft == CLEAR)) {
+                oven.cooktimerflag = CLEAR;
                 OledDisplay();
                 OledUpdate();
+
                 oven.OS = RESET;
             }
             break;
@@ -250,16 +260,14 @@ int main()
      **************************************************************************************************/
     while (1);
 }
-
-
-int speed = 2; //slowing down the speed of the time by 2
+uint16_t speed = timeSlower;
 
 void __ISR(_TIMER_1_VECTOR, ipl4auto) TimerInterrupt2Hz(void)
 {//counting for seconds
     // Clear the interrupt flag.
     IFS0CLR = 1 << 4;
-    if (speed == 0) {
-        speed = 2;
+    if (speed == CLEAR) {
+        speed = timeSlower;
         oven.cooktimerflag = TRUE;
 
     }
@@ -301,14 +309,12 @@ void OledDisplay()
     }
 
     char strings[100];
-    OledClear(0);
-
-    if (oven.inputSelection == 0) {
+    OledClear(CLEAR);
+    if (oven.inputSelection == CLEAR) {
         sprintf(pointer, ">");
-    } else if (oven.inputSelection == 1) {
+    } else if (oven.inputSelection == SET) {
         sprintf(pointertemp, ">");
     }
-
     if (oven.cookmode == Bake) {
         sprintf(tempstring, "Bake");
     }
