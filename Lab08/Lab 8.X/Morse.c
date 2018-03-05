@@ -4,17 +4,21 @@
 #include "Buttons.h"
 #define morseLevel 6
 
+// Heap size used: 6400
+
 Node *morse;
 Node *head = NULL; //head of the morse;
 static uint16_t buttonEvent;
 static int buttonCounts;
 
-static enum {
+typedef enum {
     WAITING,
     DOT,
     DASH,
     INTER_LETTER
 } MorseStates;
+
+static MorseStates morseState = WAITING;
 
 
 
@@ -48,9 +52,6 @@ int MorseInit(void)
     } else {
         return SUCCESS;
     }
-
-
-
 }
 
 /**
@@ -79,10 +80,11 @@ char MorseDecode(MorseChar in)
         morse = morse->rightChild;
         return SUCCESS;
     } else if (in == MORSE_CHAR_END_OF_CHAR) {
-        char ret = morse->data;
+        return morse->data;
+    }  else if (in == MORSE_CHAR_DECODE_RESET) {
         morse = head;
-        return ret;
-    } else {
+        return SUCCESS;
+    } else  {
         return STANDARD_ERROR;
     }
 
@@ -113,49 +115,53 @@ char MorseDecode(MorseChar in)
 //	MORSE_EVENT_INTER_LETTER,
 //	MORSE_EVENT_INTER_WORD
 //} MorseEvent;
-
+MorseStates oldState = WAITING;
 MorseEvent MorseCheckEvents(void)
 {
     buttonEvent = ButtonsCheckEvents();
     buttonCounts++;
-
-    switch (MorseStates) {
+    if(oldState != morseState) {
+        printf("state: %i\n", morseState);
+    }
+    oldState = morseState;
+    
+    switch (morseState) {
     case(WAITING):
         if (buttonEvent & BUTTON_EVENT_4DOWN) {
             buttonCounts = 0;
-            MorseStates = DOT;
+            morseState = DOT;
         } else {
-            MorseStates = WAITING;
+            morseState = WAITING;
         }
         return MORSE_EVENT_NONE;
     case(DOT):
         if (buttonCounts >= MORSE_EVENT_LENGTH_DOWN_DOT) {
-            MorseStates = DASH;
+            morseState = DASH;
         } else if (buttonEvent & BUTTON_EVENT_4UP) {
             buttonCounts = 0;
-            MorseStates = INTER_LETTER;
+            morseState = INTER_LETTER;
             return MORSE_EVENT_DOT;
         }
         return MORSE_EVENT_NONE;
     case(DASH):
         if (buttonEvent & BUTTON_EVENT_4UP) {
             buttonCounts = 0;
-            MorseStates = INTER_LETTER;
+            morseState = INTER_LETTER;
             return MORSE_EVENT_DASH;
         }
         return MORSE_EVENT_NONE;
     case(INTER_LETTER):
-        if (buttonCounts >= MORSE_EVENT_INTER_LETTER) {
-            MorseStates = WAITING;
-            return MORSE_EVENT_INTER_WORD;
+        if (buttonCounts >= MORSE_EVENT_LENGTH_UP_INTER_LETTER_TIMEOUT) {
+            morseState = WAITING;
+            return MORSE_EVENT_INTER_LETTER;
         } else if (buttonEvent & BUTTON_EVENT_4DOWN) {
-            if (buttonCounts >= MORSE_EVENT_INTER_LETTER) {
+            if (buttonCounts >= MORSE_EVENT_LENGTH_UP_INTER_LETTER) {
                 buttonCounts = 0;
-                MorseStates = DOT;
+                morseState = DOT;
                 return MORSE_EVENT_INTER_LETTER;
             } else {
                 buttonCounts = 0;
-                MorseStates = DOT;
+                morseState = DOT;
                 return MORSE_EVENT_NONE;
             }
         } 

@@ -28,7 +28,6 @@
  * tree without having first traversed down it.
  */
 
-
 /**
  * This function creates a binary tree of a given size given a serialized array of data. All nodes
  * are allocated on the heap via `malloc()` and store the input data in their data member. Note that
@@ -65,6 +64,7 @@ Node *TreeCreate(int level, const char *data)
 {
     Node *parent = malloc(sizeof (Node));
     if (parent == NULL) {
+        printf("out of memory");
         return NULL;
     }
     parent->data = *data;
@@ -81,7 +81,7 @@ Node *TreeCreate(int level, const char *data)
         if (right == NULL) {
             return NULL;
         }
-            parent->rightChild = right;
+        parent->rightChild = right;
     }
 
     return parent;
