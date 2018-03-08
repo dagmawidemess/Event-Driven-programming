@@ -4,10 +4,8 @@
 #include "Buttons.h"
 #define morseLevel 6
 
-// Heap size used: 6400
-
 Node *morse;
-Node *head = NULL; //head of the morse;
+Node *head; //head of the morse;
 static uint16_t buttonEvent;
 static int buttonCounts;
 
@@ -48,7 +46,7 @@ int MorseInit(void)
     morse = TreeCreate(morseLevel, morseAlphabet);
     head = morse;
     if (morse == NULL) {
-        return STANDARD_ERROR;
+        return STANDARD_ERROR; //return ERROR if decoded letter is NULL
     } else {
         return SUCCESS;
     }
@@ -73,18 +71,26 @@ int MorseInit(void)
  */
 char MorseDecode(MorseChar in)
 {
+
     if (in == MORSE_CHAR_DOT) {
-        morse = morse->leftChild;
+        if (morse != NULL) {
+            morse = morse->leftChild; //go to the left side of binary tree for dot
+        }
         return SUCCESS;
     } else if (in == MORSE_CHAR_DASH) {
-        morse = morse->rightChild;
+        if (morse != NULL) {
+            morse = morse->rightChild; // go to right side of binary tree for dash
+        }
         return SUCCESS;
     } else if (in == MORSE_CHAR_END_OF_CHAR) {
+        if (morse == NULL) {
+            return '#'; //when data is NULL print '#' 
+        }
         return morse->data;
-    }  else if (in == MORSE_CHAR_DECODE_RESET) {
-        morse = head;
+    } else if (in == MORSE_CHAR_DECODE_RESET) {
+        morse = head; //reset state
         return SUCCESS;
-    } else  {
+    } else {
         return STANDARD_ERROR;
     }
 
@@ -115,28 +121,29 @@ char MorseDecode(MorseChar in)
 //	MORSE_EVENT_INTER_LETTER,
 //	MORSE_EVENT_INTER_WORD
 //} MorseEvent;
-MorseStates oldState = WAITING;
+//MorseStates oldState = WAITING;
+
 MorseEvent MorseCheckEvents(void)
 {
     buttonEvent = ButtonsCheckEvents();
     buttonCounts++;
-    if(oldState != morseState) {
-        printf("state: %i\n", morseState);
-    }
-    oldState = morseState;
-    
+    //    if(oldState != morseState) {
+    //        printf("state: %i\n", morseState);
+    //    }
+    //    oldState = morseState;
+
     switch (morseState) {
     case(WAITING):
         if (buttonEvent & BUTTON_EVENT_4DOWN) {
             buttonCounts = 0;
-            morseState = DOT;
+            morseState = DOT; //if BTN4 down display DOT
         } else {
             morseState = WAITING;
         }
         return MORSE_EVENT_NONE;
     case(DOT):
         if (buttonCounts >= MORSE_EVENT_LENGTH_DOWN_DOT) {
-            morseState = DASH;
+            morseState = DASH; // if BTN4 pressed for >0.25 sec switch to DASH
         } else if (buttonEvent & BUTTON_EVENT_4UP) {
             buttonCounts = 0;
             morseState = INTER_LETTER;
@@ -146,15 +153,16 @@ MorseEvent MorseCheckEvents(void)
     case(DASH):
         if (buttonEvent & BUTTON_EVENT_4UP) {
             buttonCounts = 0;
-            morseState = INTER_LETTER;
+            morseState = INTER_LETTER; //go to INTER_LETTER state
             return MORSE_EVENT_DASH;
         }
         return MORSE_EVENT_NONE;
     case(INTER_LETTER):
         if (buttonCounts >= MORSE_EVENT_LENGTH_UP_INTER_LETTER_TIMEOUT) {
             morseState = WAITING;
-            return MORSE_EVENT_INTER_LETTER;
-        } else if (buttonEvent & BUTTON_EVENT_4DOWN) {
+            return MORSE_EVENT_INTER_WORD;
+        }
+        if (buttonEvent & BUTTON_EVENT_4DOWN) {
             if (buttonCounts >= MORSE_EVENT_LENGTH_UP_INTER_LETTER) {
                 buttonCounts = 0;
                 morseState = DOT;
@@ -164,8 +172,11 @@ MorseEvent MorseCheckEvents(void)
                 morseState = DOT;
                 return MORSE_EVENT_NONE;
             }
-        } 
-        return MORSE_EVENT_NONE;     
+
+        }
+        return MORSE_EVENT_NONE;
+
     }
     return MORSE_EVENT_NONE;
+
 }

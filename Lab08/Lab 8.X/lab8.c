@@ -1,6 +1,6 @@
 // **** Include libraries here ****
 // Standard C libraries
-
+// HEAP SIZE used: 6400
 
 //CMPE13 Support Library
 #include "BOARD.h"
@@ -20,40 +20,23 @@
 
 // User libraries
 
-
+int flag = 0;
 // **** Set any macros or preprocessor directives here ****
 // Specify a bit mask for setting/clearing the pin corresponding to BTN4. Should only be used when
 // unit testing the Morse event checker.
 #define BUTTON4_STATE_FLAG (1 << 7)
+#define SPACE ' '
 
-// **** Declare any data types here ****
-
-// **** Define any module-level, global, or external variables here ****
-
-// **** Declare any function prototypes here ****
-// static char TopLine[16];
-//static char SecondLine[16];
-//static char ThirdLine[16];
-// static char BottomLine [16];
 static void OledClearTopLine(char letter);
 static void OledAddCharToTopLine(char dotOrDash);
-// static MorseEvent event;
-
+static MorseEvent event;
 static char morseCode[16] = "";
 static char letters[100] = "";
 
 int main()
 {
+    char c;
     BOARD_Init();
-    OledInit();
-    MorseInit();
-    if (MorseInit() == STANDARD_ERROR) {
-        OledDrawString("MoreInit() FAILED");
-        OledUpdate();
-        FATAL_ERROR();
-    }
-    
-
 
     // Configure Timer 2 using PBCLK as input. We configure it using a 1:16 prescalar, so each timer
     // tick is actually at F_PB / 16 Hz, so setting PR2 to F_PB / 16 / 100 yields a .01s timer.
@@ -65,77 +48,80 @@ int main()
     INTSetVectorSubPriority(INT_TIMER_2_VECTOR, INT_SUB_PRIORITY_LEVEL_0);
     INTEnable(INT_T2, INT_ENABLED);
 
-    /******************************************************************************
-     * Your code goes in between this comment and the following one with asterisks.
-     *****************************************************************************/
+    OledInit();
+    MorseInit();
+    if (MorseInit() == STANDARD_ERROR) {
+        OledDrawString("MorseInit() FAILED");
+        OledUpdate();
+        FATAL_ERROR();
+    }
 
+    while (1) {
+        if (flag) {
+            switch (event) {
+            case MORSE_EVENT_NONE:
+                break;
+            case MORSE_EVENT_DOT:
+                MorseDecode(MORSE_CHAR_DOT);
+                OledAddCharToTopLine('.');
+                break;
+            case MORSE_EVENT_DASH:
+                MorseDecode(MORSE_CHAR_DASH);
+                OledAddCharToTopLine('-');
+                break;
+            case MORSE_EVENT_INTER_LETTER:
+                c = MorseDecode(MORSE_CHAR_END_OF_CHAR);
+                OledClearTopLine(c);
+                MorseDecode(MORSE_CHAR_DECODE_RESET);
+                break;
 
+            case MORSE_EVENT_INTER_WORD:
+                c = MorseDecode(MORSE_CHAR_END_OF_CHAR);
+                if (c != STANDARD_ERROR) {
+                    OledClearTopLine(c);
+                } else {
+                    OledClearTopLine(MORSE_CHAR_END_OF_CHAR);
+                }
+                OledClearTopLine(SPACE);
+                MorseDecode(MORSE_CHAR_DECODE_RESET);
+                break;
+            default:
+                break;
+            }
 
-    //char treeData[7] = "abdecfg";
-    //Node *parent = TreeCreate(3, treeData);
-
-    /******************************************************************************
-     * Your code goes in between this comment and the preceding one with asterisks.
-     *****************************************************************************/
+            OledUpdate();
+            event = 0;
+            flag = 0;
+        }
+    }
 
     while (1);
 }
-MorseEvent oldEvent;
+
 void __ISR(_TIMER_2_VECTOR, IPL4AUTO) TimerInterrupt100Hz(void)
 {
     // Clear the interrupt flag.
     IFS0CLR = 1 << 8;
-
-    //	MORSE_EVENT_NONE,
-    //	MORSE_EVENT_DOT,
-    //	MORSE_EVENT_DASH,
-    //	MORSE_EVENT_INTER_LETTER,
-    //	MORSE_EVENT_INTER_WORD
-    MorseEvent event = MorseCheckEvents();
-    if(event != oldEvent) {
-        printf("Event:%i\n", event);
+    event = MorseCheckEvents();
+    if (event != MORSE_EVENT_NONE) {
+        flag = 1;
     }
-    oldEvent = event;
-    switch (event) {
-    case MORSE_EVENT_NONE:
-        break;
-    case MORSE_EVENT_DOT:
-        MorseDecode(MORSE_CHAR_DOT);
-        OledAddCharToTopLine('.');
-        break;
-    case MORSE_EVENT_DASH:
-        MorseDecode(MORSE_CHAR_DASH);
-        OledAddCharToTopLine('-');
-        break;
-    case MORSE_EVENT_INTER_LETTER: {
-        char c = MorseDecode(MORSE_CHAR_END_OF_CHAR);
-        printf("output: %c\n", c);
-        OledClearTopLine(c);
-        MorseDecode(MORSE_CHAR_DECODE_RESET);
-        break;
-    }
-    case MORSE_EVENT_INTER_WORD:
-        // OledClearTopLine('');
-        MorseDecode(MORSE_CHAR_DECODE_RESET);
-        break;
-    }
-
-
-
-
-
-    //******** Put your code here *************//
 
 }
-
+//EXTRA CREDIT IMPLEMENTED BELOW in OledClearTopLine function
 
 static void OledClearTopLine(char letter)
 {
     OledClear(0);
 
-    sprintf(morseCode, "%s","");
-    sprintf(letters, "%s%c", letters, letter);
-
+    sprintf(morseCode, "%s", "");
+    sprintf(letters, "%s""%c", letters, letter);
+    if (strlen(letters) == 64) {
+        int i = 0;
+        for (; i < 64; i++) {
+            letters[i] = letters[i + 1]; // EXTRA CREDIT SHIFT DISPLAY
+        }
+    }
     char output[116];
     sprintf(output, "%s\n%s", morseCode, letters);
     OledDrawString(output);
@@ -149,6 +135,7 @@ static void OledAddCharToTopLine(char dotOrDash)
     sprintf(morseCode, "%s%c", morseCode, dotOrDash);
 
     char output[116];
+
     sprintf(output, "%s\n%s", morseCode, letters);
     OledDrawString(output);
     OledUpdate();

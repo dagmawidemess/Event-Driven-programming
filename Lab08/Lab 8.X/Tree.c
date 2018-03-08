@@ -62,9 +62,8 @@
  */
 Node *TreeCreate(int level, const char *data)
 {
-    Node *parent = malloc(sizeof (Node));
+    Node *parent = malloc(sizeof (Node));//parent assigned as NULL
     if (parent == NULL) {
-        printf("out of memory");
         return NULL;
     }
     parent->data = *data;
@@ -72,12 +71,12 @@ Node *TreeCreate(int level, const char *data)
         parent->leftChild = NULL;
         parent->rightChild = NULL;
     } else if (level > 1) {
-        Node *left = TreeCreate(level - 1, data + 1);
+        Node *left = TreeCreate(level - 1, data + 1);//recursively create left child by *data++
         if (left == NULL) {
             return NULL;
         }
         parent->leftChild = left;
-        Node *right = TreeCreate(level - 1, (data) + (int) pow(2, level - 1));
+        Node *right = TreeCreate(level - 1, (data) + (int) pow(2, level - 1));//recursively create right child with 2^level-1 
         if (right == NULL) {
             return NULL;
         }
