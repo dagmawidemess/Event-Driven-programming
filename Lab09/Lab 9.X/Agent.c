@@ -53,11 +53,12 @@
 // */
 
 uint8_t AddRanomBoat(Field *f, BoatType boatType);
+static Field enemyField;
+  static Field localField;
 
 void AgentInit(void)
 {
-    Field enemyField;
-    Field localField;
+    
 
     FieldInit(&localField, FIELD_POSITION_EMPTY);
     FieldInit(&enemyField, FIELD_POSITION_UNKNOWN);
@@ -131,7 +132,10 @@ int AgentRun(char in, char *outBuffer);
  * @see Field.h:FieldGetBoatStates()
  * @see Field.h:BoatStatus
  */
-uint8_t AgentGetStatus(void);
+uint8_t AgentGetStatus(void)
+{
+    return FieldGetBoatStates(&localField);
+}
 
 /**
  * This function returns the same data as `AgentCheckState()`, but for the enemy agent.
@@ -141,5 +145,7 @@ uint8_t AgentGetStatus(void);
  * @see Field.h:FieldGetBoatStates()
  * @see Field.h:BoatStatus
  */
-uint8_t AgentGetEnemyStatus(void);
+uint8_t AgentGetEnemyStatus(void){
+    return FieldGetBoatStates(&enemyField);
+}
 
