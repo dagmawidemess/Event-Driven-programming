@@ -280,7 +280,7 @@ uint8_t FieldAddBoat(Field *f, uint8_t row, uint8_t col, BoatDirection dir, Boat
 FieldPosition FieldRegisterEnemyAttack(Field *f, GuessData *gData) {
     FieldPosition fieldPosition = f->field[gData->row][gData->col];
     
-    switch(fieldPosition) {;
+    switch(fieldPosition) {
     case FIELD_POSITION_SMALL_BOAT:
         f->smallBoatLives--;
         if(f->smallBoatLives == 0) {

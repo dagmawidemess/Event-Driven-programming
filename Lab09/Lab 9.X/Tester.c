@@ -48,12 +48,12 @@ int main()
 
     ButtonsInit();
 
-   // OledInit();
+    OledInit();
 
     // Prompt the user to start the game and block until the first character press.
-//    OledDrawString("Press BTN4 to start.");
-//    OledUpdate();
-//    while ((buttonEvents & BUTTON_EVENT_4UP) == 0);
+    OledDrawString("Press BTN4 to start.");
+    OledUpdate();
+    while ((buttonEvents & BUTTON_EVENT_4UP) == 0);
 
 
 /******************************************************************************
