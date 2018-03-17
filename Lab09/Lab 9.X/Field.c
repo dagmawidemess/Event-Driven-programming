@@ -3,107 +3,6 @@
 #include "FieldOled.h"
 #include "Protocol.h"
 
-///**
-// * Define the dimensions of the game field. They can be overridden by compile-time specifications.
-// * All references to the dimensions of the field should use these constants instead of hard-coding
-// * a numeric value so that the field dimensions can be changed with minimal coding changes.
-// */
-//#ifndef FIELD_COLS
-//#define FIELD_COLS 10
-//#endif
-//#ifndef FIELD_ROWS
-//#define FIELD_ROWS 6
-//#endif
-//
-///**
-// * Set different constants used for conveying different information about the different locations
-// * of the field. These values should be used for the actual storage of the field state, which is
-// * almost every usage. For displaying the field using FieldPrint(), the FieldPositionDisplay enum
-// * values should be used instead.
-// */
-//typedef enum {
-//    /// These denote field positions useful for representing the local board
-//    FIELD_POSITION_EMPTY = 0,   // An empty field position.
-//    FIELD_POSITION_SMALL_BOAT,   // This position contains part of the small boat.
-//    FIELD_POSITION_MEDIUM_BOAT,  // This position contains part of the medium boat.
-//    FIELD_POSITION_LARGE_BOAT,   // This position contains part of the large boat.
-//    FIELD_POSITION_HUGE_BOAT,   // This position contains part of the huge boat.
-//    FIELD_POSITION_MISS,    // This position was attacked by the enemy, but was empty.
-//
-//    /// These denote field positions useful for representing the enemy's board
-//    FIELD_POSITION_UNKNOWN, // It is unknown what is here. Useful for denoting a position on the
-//                            // enemy's board that hasn't been checked.
-//    FIELD_POSITION_HIT,     // A field position that was attacked and contained part of a boat.
-//    FIELD_POSITION_CURSOR   // This is used merely for use in FieldOled.c for indicating the current
-//                            // cursor when selecting a position to attack.
-//} FieldPosition;
-//
-///**
-// * A struct for tracking all of the necessary data for an agent's field.
-// */
-//typedef struct {
-//    FieldPosition field[FIELD_ROWS][FIELD_COLS];
-//    uint8_t smallBoatLives;
-//    uint8_t mediumBoatLives;
-//    uint8_t largeBoatLives;
-//    uint8_t hugeBoatLives;
-//} Field;
-//
-///**
-// * Specify how many boats there exist on the field. There is 1 boat of each of the 4 types, so 4
-// * total.
-// */
-//#define FIELD_NUM_BOATS 4
-//
-///**
-// * Declares direction constants for use with FieldAddShip.
-// */
-//typedef enum {
-//    FIELD_BOAT_DIRECTION_NORTH,
-//    FIELD_BOAT_DIRECTION_EAST,
-//    FIELD_BOAT_DIRECTION_SOUTH,
-//    FIELD_BOAT_DIRECTION_WEST
-//} BoatDirection;
-//
-///**
-// * Constants for specifying which boat the current operation refers to. This is independent of the
-// * FieldPosition enum.
-// */
-//typedef enum {
-//    FIELD_BOAT_SMALL,
-//    FIELD_BOAT_MEDIUM,
-//    FIELD_BOAT_LARGE,
-//    FIELD_BOAT_HUGE
-//} BoatType;
-//
-///**
-// * Track the alive state of the boats. They are arranged as as mutually-exclusive bits so that they
-// * can be ORed together. Used for checking the return value of  `FieldGetBoatStates()`.
-// */
-//typedef enum {
-//    FIELD_BOAT_STATUS_SMALL  = 0x01,
-//    FIELD_BOAT_STATUS_MEDIUM = 0x02,
-//    FIELD_BOAT_STATUS_LARGE  = 0x04,
-//    FIELD_BOAT_STATUS_HUGE   = 0x08,
-//} BoatStatus;
-//
-///**
-// * This enum lists the number of lives, and therefore the number of squares, each boat has/occupies.
-// */
-//typedef enum {
-//    FIELD_BOAT_LIVES_SMALL  = 3,
-//    FIELD_BOAT_LIVES_MEDIUM = 4,
-//    FIELD_BOAT_LIVES_LARGE  = 5,
-//    FIELD_BOAT_LIVES_HUGE   = 6
-//} BoatLives;
-
-/**
- * FieldInit() will fill the passed field array with the data specified in positionData. Also the
- * lives for each boat are filled according to the `BoatLives` enum.
- * @param f The field to initialize.
- * @param p The data to initialize the entire field to, should be a member of enum
- *                     FieldPosition.
- */
 static int x, y;
 
 void FieldInit(Field *f, FieldPosition p)
@@ -194,7 +93,7 @@ uint8_t FieldAddBoat(Field *f, uint8_t row, uint8_t col, BoatDirection dir, Boat
     int boatLength;
     FieldPosition fieldPosition;
 
-    switch(type) {
+    switch (type) {
     case(FIELD_BOAT_SMALL):
         boatLength = FIELD_BOAT_LIVES_SMALL;
         fieldPosition = FIELD_POSITION_SMALL_BOAT;
@@ -212,15 +111,16 @@ uint8_t FieldAddBoat(Field *f, uint8_t row, uint8_t col, BoatDirection dir, Boat
         fieldPosition = FIELD_POSITION_HUGE_BOAT;
         break;
     }
-    
+
     int newCol = col;
     int newRow = row;
 
-    while ( (newCol >= 0) && (newRow >= 0) && (newRow < FIELD_ROWS) && (newCol < FIELD_COLS) && (abs(newCol - col) < boatLength) && (abs(newRow - row) < boatLength)) {
+    while ((newCol >= 0) && (newRow >= 0) && (newRow < FIELD_ROWS) && (newCol < FIELD_COLS) &&
+            (abs(newCol - col) < boatLength) && (abs(newRow - row) < boatLength)) {
 
-       if( f->field[newRow][newCol] != FIELD_POSITION_EMPTY) {
-           return FALSE;
-       }
+        if (f->field[newRow][newCol] != FIELD_POSITION_EMPTY) {
+            return FALSE;
+        }
         switch (dir) {
         case FIELD_BOAT_DIRECTION_NORTH:
             newRow--;
@@ -236,15 +136,16 @@ uint8_t FieldAddBoat(Field *f, uint8_t row, uint8_t col, BoatDirection dir, Boat
             break;
         }
     }
-    
-    if((abs(newCol - col) != boatLength) && (abs(newRow - row) != boatLength)) {
+
+    if ((abs(newCol - col) != boatLength) && (abs(newRow - row) != boatLength)) {
         return FALSE;
     }
-    
+
     newCol = col;
     newRow = row;
 
-    while ( (newCol >= 0) && (newRow >= 0) && (newRow < FIELD_ROWS) && (newCol < FIELD_COLS) && (abs(newCol - col) < boatLength) && (abs(newRow - row) < boatLength)) {
+    while ((newCol >= 0) && (newRow >= 0) && (newRow < FIELD_ROWS) && (newCol < FIELD_COLS) &&
+            (abs(newCol - col) < boatLength) && (abs(newRow - row) < boatLength)) {
 
         f->field[newRow][newCol] = fieldPosition;
         switch (dir) {
@@ -261,7 +162,23 @@ uint8_t FieldAddBoat(Field *f, uint8_t row, uint8_t col, BoatDirection dir, Boat
             newCol--;
             break;
         }
-    }  
+    }
+
+    switch (type) {
+    case(FIELD_BOAT_SMALL):
+        f->smallBoatLives = FIELD_BOAT_LIVES_SMALL;
+        break;
+    case(FIELD_BOAT_MEDIUM):
+        f->mediumBoatLives = FIELD_BOAT_LIVES_MEDIUM;
+        break;
+    case(FIELD_BOAT_LARGE):
+        f->largeBoatLives = FIELD_BOAT_LIVES_LARGE;
+        break;
+    case(FIELD_BOAT_HUGE):
+        f->hugeBoatLives = FIELD_BOAT_LIVES_HUGE;
+        break;
+    }
+
     return TRUE;
 
 }
@@ -277,58 +194,62 @@ uint8_t FieldAddBoat(Field *f, uint8_t row, uint8_t col, BoatDirection dir, Boat
  *               output.
  * @return The data that was stored at the field position indicated by gData before this attack.
  */
-FieldPosition FieldRegisterEnemyAttack(Field *f, GuessData *gData) {
+FieldPosition FieldRegisterEnemyAttack(Field *f, GuessData *gData)
+{
     FieldPosition fieldPosition = f->field[gData->row][gData->col];
-    
-    switch(fieldPosition) {
+
+    switch (fieldPosition) {
     case FIELD_POSITION_SMALL_BOAT:
-        f->smallBoatLives--;
-        if(f->smallBoatLives == 0) {
+        f->smallBoatLives--;//decrement if its not a sink
+        if (f->smallBoatLives == 0) {
             gData->hit = HIT_SUNK_SMALL_BOAT;
         } else {
             gData->hit = HIT_HIT;
         }
-        
+
         f->field[gData->row][gData->col] = FIELD_POSITION_HIT;
         break;
     case FIELD_POSITION_MEDIUM_BOAT:
-        f->mediumBoatLives--;
-        if(f->mediumBoatLives == 0) {
+        f->mediumBoatLives--;//decrement if its not a sink
+        if (f->mediumBoatLives == 0) {
             gData->hit = HIT_SUNK_MEDIUM_BOAT;
         } else {
             gData->hit = HIT_HIT;
         }
-        
+
         f->field[gData->row][gData->col] = FIELD_POSITION_HIT;
         break;
     case FIELD_POSITION_LARGE_BOAT:
-        f->largeBoatLives--;
-        if(f->largeBoatLives == 0) {
+        f->largeBoatLives--;//decrement if its not a sink
+        if (f->largeBoatLives == 0) {
             gData->hit = HIT_SUNK_LARGE_BOAT;
         } else {
             gData->hit = HIT_HIT;
         }
-        
+
         f->field[gData->row][gData->col] = FIELD_POSITION_HIT;
         break;
     case FIELD_POSITION_HUGE_BOAT:
-        f->hugeBoatLives--;
-        if(f->hugeBoatLives == 0) {
+        f->hugeBoatLives--;//decrement if its not a sink
+        if (f->hugeBoatLives == 0) {
             gData->hit = HIT_SUNK_HUGE_BOAT;
         } else {
             gData->hit = HIT_HIT;
         }
-        
+
         f->field[gData->row][gData->col] = FIELD_POSITION_HIT;
         break;
-     default:    
+    case FIELD_POSITION_HIT:
+        gData->hit = HIT_HIT;
+        break;
+    default:
         gData->hit = HIT_MISS;
         f->field[gData->row][gData->col] = FIELD_POSITION_MISS;
         break;
     }
-    
-    return fieldPosition; 
-    
+
+    return fieldPosition;
+
 }
 
 /**
@@ -347,24 +268,33 @@ FieldPosition FieldRegisterEnemyAttack(Field *f, GuessData *gData) {
 FieldPosition FieldUpdateKnowledge(Field *f, const GuessData *gData)
 {
     FieldPosition fieldPosition = f->field[gData->row][gData->col];
-    
-    switch(gData->hit) {
+
+    switch (gData->hit) {
+        //when hit to boat happens
     case HIT_HIT:
         f->field[gData->row][gData->col] = FIELD_POSITION_HIT;
+        break;
+        //when a hit is missed
     case HIT_MISS:
         f->field[gData->row][gData->col] = FIELD_POSITION_EMPTY;
+        break;
+        //when all the boats are sunked
     case HIT_SUNK_SMALL_BOAT:
         f->field[gData->row][gData->col] = FIELD_POSITION_HIT;
         f->smallBoatLives = 0;
+        break;
     case HIT_SUNK_MEDIUM_BOAT:
         f->field[gData->row][gData->col] = FIELD_POSITION_HIT;
         f->mediumBoatLives = 0;
+        break;
     case HIT_SUNK_LARGE_BOAT:
         f->field[gData->row][gData->col] = FIELD_POSITION_HIT;
         f->largeBoatLives = 0;
+        break;
     case HIT_SUNK_HUGE_BOAT:
         f->field[gData->row][gData->col] = FIELD_POSITION_HIT;
-        f->hugeBoatLives = 0;        
+        f->hugeBoatLives = 0;
+        break;
     }
 
     return fieldPosition;
@@ -382,23 +312,23 @@ uint8_t FieldGetBoatStates(const Field *f)
 {
 
     uint8_t boatStates = 0; //1-alive 0-dead
-    
-    if(f->hugeBoatLives > 0) {
+
+    if (f->hugeBoatLives > 0) {
         boatStates |= FIELD_BOAT_STATUS_HUGE;
     }
-    
-    if(f->largeBoatLives > 0) {
+
+    if (f->largeBoatLives > 0) {
         boatStates |= FIELD_BOAT_STATUS_LARGE;
     }
-   
+
     if (f->mediumBoatLives > 0) {
         boatStates |= FIELD_BOAT_STATUS_MEDIUM;
     }
-    
+
     if (f->smallBoatLives > 0) {
         boatStates |= FIELD_BOAT_STATUS_SMALL;
     }
-  
+
     return boatStates; //return results of BoatStates
 
 }

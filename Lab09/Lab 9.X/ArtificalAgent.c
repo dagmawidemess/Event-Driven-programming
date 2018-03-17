@@ -116,20 +116,22 @@ int AgentRun(char in, char *outBuffer)
     static FieldOledTurn whoseTurn;
 
     // State machine data
-    static NegotiationData myNeg = {};
-    static NegotiationData theirNeg = {};
-    static GuessData myGuess = {};
-    static GuessData theirGuess = {};
+     static NegotiationData myNeg;
+    static NegotiationData theirNeg;
+     static GuessData myGuess;
+    static  GuessData theirGuess;
 
     // non-static data
     int isParsed;
-     int delayer;
+    int delayer;
 
     switch (AgentState) {
     case GENERATE_DATA:
         // Generates negotiation data and encodes challenge message to outBuffer
         ProtocolGenerateNegotiationData(&myNeg);
         AgentState = SEND_DATA;
+        if (in == '$')
+            ProtocolDecode('$', &theirNeg, &theirGuess);
         return ProtocolEncodeChaMessage(outBuffer, &myNeg);
         break;
 
@@ -145,7 +147,7 @@ int AgentRun(char in, char *outBuffer)
             AgentState = DETERMINE_ORDER;
             return ProtocolEncodeDetMessage(outBuffer, &myNeg);
         } else if (!(isParsed == PROTOCOL_WAITING || isParsed == PROTOCOL_PARSING_GOOD)) {
-            OLED_PRINT_ERROR("parsing error");
+            OLED_PRINT_ERROR("parsing error, SEND_DATA");
         }
 
         return 0; //send nothing, wait for next char
@@ -165,16 +167,18 @@ int AgentRun(char in, char *outBuffer)
 
                 TurnOrder order = ProtocolGetTurnOrder(&myNeg, &theirNeg);
 
-                if (order = TURN_ORDER_START) {
+                if (order == TURN_ORDER_START) {
                     whoseTurn = FIELD_OLED_TURN_MINE; //sets turn to mine
+                    // OledClear(OLED_COLOR_BLACK);
                     FieldOledDrawScreen(&localField, &enemyField, whoseTurn);
                     OledUpdate();
 
                     // Advance state and return 0
                     AgentState = SEND_GUESS;
                     return 0;
-                } else if (order = TURN_ORDER_DEFER) {
+                } else if (order == TURN_ORDER_DEFER) {
                     whoseTurn = FIELD_OLED_TURN_THEIRS; //sets turn to theirs
+                    // OledClear(OLED_COLOR_BLACK);
                     FieldOledDrawScreen(&localField, &enemyField, whoseTurn);
                     OledUpdate();
 
@@ -191,7 +195,7 @@ int AgentRun(char in, char *outBuffer)
             } // Evaluates whether negotiation data is valid
 
         } else if (!(isParsed == PROTOCOL_WAITING || isParsed == PROTOCOL_PARSING_GOOD)) {
-            OLED_PRINT_ERROR("parsing error");
+            OLED_PRINT_ERROR("parsing error, DETERMINE_ORDER");
         }
 
         return 0; //send nothing, wait for next char
@@ -209,22 +213,25 @@ int AgentRun(char in, char *outBuffer)
 
             FieldRegisterEnemyAttack(&localField, &theirGuess);
 
-            if (FieldGetBoatStates(&localField)) {
+            if (AgentGetStatus() > 0) {
                 AgentState = SEND_GUESS;
                 whoseTurn = FIELD_OLED_TURN_MINE;
+               //  OledClear(OLED_COLOR_BLACK);
                 FieldOledDrawScreen(&localField, &enemyField, whoseTurn);
                 OledUpdate();
                 return ProtocolEncodeHitMessage(outBuffer, &theirGuess);
             } else {
+               // printf("Dagim ")
                 AgentState = LOST;
                 whoseTurn = FIELD_OLED_TURN_NONE;
+                // OledClear(OLED_COLOR_BLACK);
                 FieldOledDrawScreen(&localField, &enemyField, whoseTurn);
                 OledUpdate();
                 return ProtocolEncodeHitMessage(outBuffer, &theirGuess);
             } //tells whether any boats remain
 
         } else if (!(isParsed == PROTOCOL_WAITING || isParsed == PROTOCOL_PARSING_GOOD)) {
-            OLED_PRINT_ERROR("parsing error");
+            OLED_PRINT_ERROR("parsing error, WAIT_FOR_GUESS");
         }
 
         return 0; //send nothing, wait for next char
@@ -233,12 +240,14 @@ int AgentRun(char in, char *outBuffer)
     case SEND_GUESS:
 
         // ADD DELAY HERE
-       
-        for(delayer=0;delayer<5000000; delayer++);
+        for (delayer = 0; delayer < 5000000; delayer++);
+
         GenerateGuessData(&myGuess);
         AgentState = WAIT_FOR_HIT;
         whoseTurn = FIELD_OLED_TURN_THEIRS;
+        OledClear(OLED_COLOR_BLACK);
         FieldOledDrawScreen(&localField, &enemyField, whoseTurn);
+        OledUpdate();
         return ProtocolEncodeCooMessage(outBuffer, &myGuess);
         break;
 
@@ -257,30 +266,32 @@ int AgentRun(char in, char *outBuffer)
             if (FieldGetBoatStates(&enemyField)) {
                 AgentState = WAIT_FOR_GUESS;
                 whoseTurn = FIELD_OLED_TURN_THEIRS;
+                // OledClear(OLED_COLOR_BLACK);
                 FieldOledDrawScreen(&localField, &enemyField, whoseTurn);
                 OledUpdate();
                 return 0;
             } else {
                 AgentState = WON;
                 whoseTurn = FIELD_OLED_TURN_NONE;
+               //  OledClear(OLED_COLOR_BLACK);
                 FieldOledDrawScreen(&localField, &enemyField, whoseTurn);
                 OledUpdate();
                 return 0;
             } //tells whether any boats remain
 
         } else if (!(isParsed == PROTOCOL_WAITING || isParsed == PROTOCOL_PARSING_GOOD)) {
-            OLED_PRINT_ERROR("parsing error");
+            OLED_PRINT_ERROR("parsing error, WAIT_FOR_HIT");
         }
 
         return 0; //send nothing, wait for next char
         break;
 
     case WON:
-
+       // printf("win");
         break;
 
     case LOST:
-
+        //printf("loss");
         break;
     }
 
@@ -320,6 +331,8 @@ uint8_t AgentGetEnemyStatus(void)
 
 void GenerateGuessData(GuessData *data)
 {
-    data->row = rand() % FIELD_COLS;
-    data->col = rand() % FIELD_ROWS;
+    do {
+        data->col = (rand() % FIELD_COLS);
+        data->row = (rand() % FIELD_ROWS);
+    } while (enemyField.field[data->row][data->col] != FIELD_POSITION_UNKNOWN);
 }
