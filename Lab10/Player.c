@@ -30,7 +30,6 @@ int FindInInventory(uint8_t item) {
   if (item == 0) {
     return SUCCESS;
   }
-  
   int i;
   for (i = 0; i < currentInventorySize; i++) {
     if (inventory[i] == item) {

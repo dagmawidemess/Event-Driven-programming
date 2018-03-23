@@ -26,6 +26,9 @@ int main()
 {
 
   GameInit();
+  if(GameInit()!= SUCCESS){
+	  FATAL_ERROR();
+  }
   do {
     char title[GAME_MAX_ROOM_TITLE_LENGTH];
     printf("\33[s\33[2J");
@@ -65,7 +68,7 @@ int main()
       printf("\33[10C\33[31mSouth\n");
     }
     
-    printf("\33[0mEnter your choice (s, w, e, n or q): ");
+    printf("\33[0m->Enter your choice (s, w, e, n or q): ");
     int input;
     do
     {

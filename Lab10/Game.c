@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "Player.h"
 
@@ -122,7 +123,8 @@ int GameGoWest(void) {
 }
 
 /**
- * This function sets up anything that needs to happen at the start of the game. This is just
+ * This function sets up an
+ ything that needs to happen at the start of the game. This is just
  * setting the current room to STARTING_ROOM and loading it. It should return SUCCESS if it succeeds
  * and STANDARD_ERROR if it doesn't.
  * @return SUCCESS or STANDARD_ERROR
@@ -210,7 +212,8 @@ struct Room* GameLoadRoom(uint8_t roomNumber) {
   
   char fileName[255];
   sprintf(fileName,"RoomFiles/room%d.txt", roomNumber);
-  FILE *filePointer = fopen(fileName,"r");
+ FILE *filePointer = fopen(fileName,"r");
+if (filePointer==NULL) FATAL_ERROR();
   
   uint8_t titleLength = fgetc(filePointer);
   Decrypt(&titleLength, 1, roomNumber + DECRYPTION_BASE_KEY);
@@ -222,7 +225,9 @@ struct Room* GameLoadRoom(uint8_t roomNumber) {
   int numberOfVersions = 0;
   while(!feof(filePointer)) {
     struct RoomVersionInfo *roomVersionInfo = GameReadRoomVersionInfo(filePointer, roomNumber+DECRYPTION_BASE_KEY);
-    if(roomVersionInfo == NULL) break;
+    if(roomVersionInfo == NULL){
+		break;
+	}
     room->versions[numberOfVersions++] = roomVersionInfo;
     room->numberOfVersions = numberOfVersions;
   }
@@ -272,8 +277,9 @@ struct RoomVersionInfo* GameReadRoomVersionInfo(FILE *filePointer, uint8_t decry
 }
 
 void DestroyRoom(struct Room *room) {
-  if(room == NULL) return;
-  
+  if(room == NULL){
+	  return;
+  }
   int version = 0;
   for(; version < room->numberOfVersions; version++) {
     free(room->versions[version]);
